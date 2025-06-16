@@ -63,6 +63,7 @@ public class ChatMember : MonoBehaviour
 	public bool RemoveGroup(GroupChat group)
 	{
 		if (!Groups.Remove(group)) return false;
+		_mutedGroups.Remove(group);
 		if (Groups.Count > 0)
 		{
 			if (CurrentGroup.Equals(group))
