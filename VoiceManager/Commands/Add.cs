@@ -62,7 +62,7 @@ public class Add : ICommand, IUsageProvider
 		var isTemp = false;
 		if (arguments.Count > 2)
 		{
-			var strTemp = arguments.At(3);
+			var strTemp = arguments.At(2);
 			if (strTemp.ToLower() == "y") 
 				isTemp = true;
 		}

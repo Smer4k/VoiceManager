@@ -47,28 +47,23 @@ public class GroupChat
 		return TryAddMember(hub.GetChatMember(), isTemp);
 	}
 
-	public bool TryRemoveMember(ChatMember member, bool isTemp = false)
+	public bool TryRemoveMember(ChatMember member)
 	{
-		if (isTemp)
+		if (!TempMembers.Remove(member) && !Members.Remove(member))
 		{
-			if (!TempMembers.Remove(member))
-				return false;
+			return false;
 		}
-		else
-		{
-			if (!Members.Remove(member))
-				return false;
-		}
+	
 		member.RemoveGroup(this);
 		return true;
 	}
 	
-	public bool TryRemoveMember(Player player, bool isTemp = false)
+	public bool TryRemoveMember(Player player)
 	{
 		return TryRemoveMember(player.GetChatMember());
 	}
 	
-	public bool TryRemoveMember(ReferenceHub hub, bool isTemp = false)
+	public bool TryRemoveMember(ReferenceHub hub)
 	{
 		return TryRemoveMember(hub.GetChatMember());
 	}
@@ -94,6 +89,11 @@ public class GroupChat
 	public void SetName(string value)
 	{
 		Name = value;
+	}
+
+	public bool IsTempMember(ChatMember member)
+	{
+		return TempMembers.Contains(member);
 	}
 
 	public string GetAllMembersText()

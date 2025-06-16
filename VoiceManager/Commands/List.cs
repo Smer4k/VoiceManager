@@ -37,6 +37,10 @@ public class List : ICommand
 			{
 				sb.AppendLine($"- PlayerId: {member.Hub.PlayerId} | {member}");
 			}
+			foreach (var member in group.TempMembers)
+			{
+				sb.AppendLine($"- PlayerId: {member.Hub.PlayerId} | {member} (TEMP)");
+			}
 		}
 
 		response = StringBuilderPool.Shared.ToStringReturn(sb);

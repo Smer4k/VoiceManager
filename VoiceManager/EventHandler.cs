@@ -28,9 +28,9 @@ public class EventHandler : CustomEventsHandler
 		if (member.TempCanUseProximityChat)
 			member.SetCanUseProximityChat(false);
 		
-		foreach (var group in member.Groups)
+		foreach (var group in member.Groups.ToArray())
 		{
-			group.TryRemoveMember(member, true);
+			if (group.IsTempMember(member)) group.TryRemoveMember(member);
 		}
 	}
 
