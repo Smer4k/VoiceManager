@@ -5,6 +5,7 @@ using LabApi.Features;
 using LabApi.Loader.Features.Plugins;
 using VoiceManager.SpecificSettings;
 using RueI;
+using VoiceManager.Features;
 
 
 namespace VoiceManager;
@@ -17,10 +18,10 @@ public class VoiceManager : Plugin<Config>
 	public override Version Version { get; } = new Version(1, 0, 0);
 	public override Version RequiredApiVersion { get; } = LabApiProperties.CurrentVersion;
 	public static VoiceManager Singleton;
-	public static bool AutoInitChatMembers;
-	public bool RueiEnabled;
+	public static bool RueiEnabled;
 	private static EventHandler _eventHandler = new();
 	private static SSChatController _ssChatController;
+	public static Config VConfig => Singleton.Config;
 
 	public override void Enable()
 	{
@@ -29,7 +30,8 @@ public class VoiceManager : Plugin<Config>
 
 		Singleton = this;
 		CustomHandlersManager.RegisterEventsHandler(_eventHandler);
-		AutoInitChatMembers = Config.AutoInitChatMembers;
+		Settings.InitDefault();
+		
 		try
 		{
 			RueIMain.EnsureInit();

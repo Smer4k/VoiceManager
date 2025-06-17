@@ -8,11 +8,13 @@ public class Config
 {
 	public bool IsEnabled { get; set; } = true;
 	public bool Debug { get; set; } = false;
-	public bool AutoInitChatMembers { get; set; } = false;
+	public bool Use3DProximityChat { get; set; } = true;
+	public float Volume3DProximityChat { get; set; } = 3f;
+	public float MinProximityDistance { get; set; } = 2f;
+	public float MaxProximityDistance { get; set; } = 10f;
 	
 	[Description("Automatically add players with allowed role")]
 	public bool AutoInitProximityChatRoles { get; set; } = false;
-	public float MaxProximityDistance { get; set; } = 7f;
 
 	[Description("Roles that will have access to Proximity Chat")]
 	public HashSet<RoleTypeId> ProximityChatRoles { get; set; } =

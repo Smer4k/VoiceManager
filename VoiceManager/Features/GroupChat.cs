@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using LabApi.Features.Wrappers;
 using NorthwoodLib.Pools;
-using VoiceManager.Features.MonoBehaviours;
 
 namespace VoiceManager.Features;
 
@@ -39,12 +38,12 @@ public class GroupChat
 	
 	public bool TryAddMember(Player player, bool isTemp = false)
 	{
-		return TryAddMember(player.GetChatMember(), isTemp);
+		return TryAddMember(ChatMember.Get(player), isTemp);
 	}
 	
 	public bool TryAddMember(ReferenceHub hub, bool isTemp = false)
 	{
-		return TryAddMember(hub.GetChatMember(), isTemp);
+		return TryAddMember(ChatMember.Get(hub), isTemp);
 	}
 
 	public bool TryRemoveMember(ChatMember member)
@@ -60,12 +59,12 @@ public class GroupChat
 	
 	public bool TryRemoveMember(Player player)
 	{
-		return TryRemoveMember(player.GetChatMember());
+		return TryRemoveMember(ChatMember.Get(player));
 	}
 	
 	public bool TryRemoveMember(ReferenceHub hub)
 	{
-		return TryRemoveMember(hub.GetChatMember());
+		return TryRemoveMember(ChatMember.Get(hub));
 	}
 
 	public void RemoveAllTempMembers()

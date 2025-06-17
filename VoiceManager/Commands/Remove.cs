@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using VoiceManager.Features;
-using VoiceManager.Features.MonoBehaviours;
 
 namespace VoiceManager.Commands;
 
@@ -18,15 +17,10 @@ public class Remove : ICommand, IUsageProvider
 
 	public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
 	{
-		if (!VoiceManager.AutoInitChatMembers)
-		{
-			response = "Plugin not initialized! Use: groupchat setactive enabled";
-			return false;
-		}
-		
 		if (arguments.Count < 2)
 		{
-			response = "Usage: groupchat remove [<player id>] [<group id>/PROX]\n" +
+			var usage = string.Join(" ", Array.ConvertAll(Usage, u => $"[{u}]"));
+			response = $"Usage: {GroupChatParent.CommandName} {Command} {usage}\n" +
 			           "(use PROX if you need to remove permission to use Proximity chat)";
 			return false;
 		}
@@ -37,7 +31,7 @@ public class Remove : ICommand, IUsageProvider
 			if (!int.TryParse(id, out var playerId)) continue;
 			var player = Player.Get(playerId);
 			if (player == null) continue;
-			members.Add(player.GetChatMember());
+			members.Add(ChatMember.Get(player));
 		}
 
 		bool isProx = arguments.At(1).ToLower() == "prox";
@@ -68,8 +62,8 @@ public class Remove : ICommand, IUsageProvider
 				continue;
 			}
 
-			if (!member.CanUseProximityChat) continue;
-			member.SetCanUseProximityChat(false);
+			if (!member.ProximityChat) continue;
+			member.SetProximityChat(false);
 			countRemoved++;
 		}
 

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using CommandSystem;
 using LabApi.Features.Wrappers;
+using PlayerRoles;
 using VoiceManager.Features;
-using VoiceManager.Features.MonoBehaviours;
 
 namespace VoiceManager.Commands;
 
@@ -13,20 +13,15 @@ public class Add : ICommand, IUsageProvider
 {
 	public string Command { get; } = "add";
 	public string[] Aliases { get; } = ["a"];
-	public string[] Usage { get; } = ["player id", "group id/PROX"];
+	public string[] Usage { get; } = ["player id", "group id/PROX", "(optional) temp? <y/n>"];
 	public string Description { get; } = "Adds a player to the specified group";
 
 	public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
 	{
-		if (!VoiceManager.AutoInitChatMembers)
-		{
-			response = "Plugin not initialized! Use: groupchat setactive enabled";
-			return false;
-		}
-		
 		if (arguments.Count < 2)
 		{
-			response = "Usage: groupchat add [<player id>] [<group id>/PROX] [(optional) 1 live? <y/n>]\n" +
+			var usage = string.Join(" ", Array.ConvertAll(Usage, u => $"[{u}]"));
+			response = $"Usage: {GroupChatParent.CommandName} {Command} {usage}\n" +
 			           "(use PROX if you need to give permission to use Proximity chat)";
 			return false;
 		}
@@ -38,11 +33,13 @@ public class Add : ICommand, IUsageProvider
 			if (!int.TryParse(id, out int playerId)) continue;
 			var player = Player.Get(playerId);
 			if (player == null) continue;
-			members.Add(player.GetChatMember());
+			members.Add(ChatMember.Get(player));
 		}
 
 		bool isProx = arguments.At(1).ToLower() == "prox";
+
 		GroupChat group = null;
+
 		if (!isProx)
 		{
 			if (!int.TryParse(arguments.At(1), out int groupId))
@@ -63,10 +60,10 @@ public class Add : ICommand, IUsageProvider
 		if (arguments.Count > 2)
 		{
 			var strTemp = arguments.At(2);
-			if (strTemp.ToLower() == "y") 
+			if (strTemp.ToLower() == "y")
 				isTemp = true;
 		}
-		
+
 		var countAdded = 0;
 		foreach (var member in members)
 		{
@@ -77,8 +74,8 @@ public class Add : ICommand, IUsageProvider
 				continue;
 			}
 
-			if (member.CanUseProximityChat) continue;
-			member.SetCanUseProximityChat(true);
+			if (member.ProximityChat || !member.Hub.IsSCP()) continue;
+			member.SetProximityChat(true);
 			countAdded++;
 		}
 

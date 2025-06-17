@@ -1,7 +1,6 @@
 using PlayerRoles;
 using UserSettings.ServerSpecific;
 using VoiceManager.Features;
-using VoiceManager.Features.MonoBehaviours;
 
 namespace VoiceManager.SpecificSettings;
 
@@ -32,8 +31,10 @@ public class SSChatController
 
 	private void ProcessUserInput(ReferenceHub sender, ServerSpecificSettingBase setting)
 	{
-		var member = sender.GetChatMember();
-		if (member == null) return;
+		if (!sender.IsAlive()) return;
+
+		var member = ChatMember.Get(sender);
+		
 		switch (setting.SettingId)
 		{
 			case 0:
@@ -85,7 +86,7 @@ public class SSChatController
 	
 	private static void OnEnableProximityChat(ChatMember member, bool state)
 	{
-		if (!member.Hub.IsAlive() || !member.CanUseProximityChat)
+		if (!member.ProximityChat)
 		{
 			return;
 		}
@@ -99,7 +100,7 @@ public class SSChatController
 
 	private static void OnEnableGroupChat(ChatMember member, bool state)
 	{
-		if (!member.Hub.IsAlive() || member.Groups.Count < 1)
+		if (member.Groups.Count < 1)
 		{
 			return;
 		}

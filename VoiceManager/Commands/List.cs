@@ -16,12 +16,6 @@ public class List : ICommand
 
 	public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
 	{
-		if (!VoiceManager.AutoInitChatMembers)
-		{
-			response = "Plugin not initialized! Use: groupchat setactive enabled";
-			return false;
-		}
-		
 		if (ChatManager.Groups.Count == 0)
 		{
 			response = "There are no groups";

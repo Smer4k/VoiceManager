@@ -15,15 +15,11 @@ public class Delete : ICommand, IUsageProvider
 
 	public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
 	{
-		if (!VoiceManager.AutoInitChatMembers)
-		{
-			response = "Plugin not initialized! Use: groupchat setactive enabled";
-			return false;
-		}
-		
 		if (arguments.Count < 1)
 		{
-			response = "Usage: groupchat delete [<group id>/all] (use \"all\" if you want to delete all groups)";
+			var usage = string.Join(" ", Array.ConvertAll(Usage, u => $"[{u}]"));
+			response = $"Usage: {GroupChatParent.CommandName} {Command} {usage}\n" +
+			           $"(use \"all\" if you want to delete all groups)";
 			return false;
 		}
 

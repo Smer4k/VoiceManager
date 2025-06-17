@@ -1,11 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using LabApi.Features.Wrappers;
+using PlayerRoles;
+using PlayerRoles.FirstPersonControl;
 using PlayerRoles.Spectating;
+using PlayerRoles.Voice;
 using UnityEngine;
 using VoiceChat;
 using VoiceChat.Networking;
-using VoiceManager.Features.MonoBehaviours;
 
 namespace VoiceManager.Features;
 
@@ -60,7 +62,7 @@ public static class ChatManager
 			if (group.Id != id) continue;
 			group.RemoveAllMembers();
 			group.RemoveAllTempMembers();
-			
+
 			return Groups.Remove(group);
 		}
 
@@ -97,57 +99,92 @@ public static class ChatManager
 		Groups.Clear();
 	}
 
-	public static void InitChatMembers()
+	public static void DeleteAllChatMembers()
 	{
 		foreach (var hub in ReferenceHub.AllHubs)
 		{
-			ChatMember.Init(hub);
+			ChatMember.Remove(hub);
+			OpusHandler.Remove(hub);
 		}
 	}
 
-	public static void DestroyChatMembers()
-	{
-		foreach (var hub in ReferenceHub.AllHubs)
-		{
-			var member = hub.GetChatMember();
-			if (member == null) continue;
-			GameObject.Destroy(member);
-		}
-	}
-	
 	public static void SendMessage(ChatMember sender, VoiceMessage msg)
 	{
 		if (sender.CurrentGroup != null && sender.GroupChatEnabled)
 		{
 			msg.Channel = VoiceChatChannel.RoundSummary;
-			foreach (var member in sender.CurrentGroup.Members)
+			foreach (var target in sender.CurrentGroup.Members)
 			{
-				if (member.Hub == sender.Hub) continue;
-				if (member.IsGroupMuted(sender.CurrentGroup)) continue;
-				member.Hub.connectionToClient.Send(msg);
+				if (target.Hub == sender.Hub) continue;
+				if (target.IsGroupMuted(sender.CurrentGroup)) continue;
+				target.Hub.connectionToClient.Send(msg);
 			}
 		}
 
-		// if (!sender.Hub.IsSCP())
-		// 	return;
+		if (!sender.ProximityChat || !sender.ProximityChatEnabled || !sender.Hub.IsAlive()) return;
 
-		if (sender.CanUseProximityChat && sender.ProximityChatEnabled)
+		Settings.TryGetSetting(nameof(VoiceManager.VConfig.Use3DProximityChat), out bool use3DProximityChat);
+
+		if (use3DProximityChat)
 		{
-			msg.Channel = VoiceChatChannel.Proximity;
-			foreach (var hub in ReferenceHub.AllHubs)
+			sender.SpeakerToy.Position = sender.Hub.GetPosition();
+			
+			var opusHandler = OpusHandler.Get(sender.Hub);
+			var decodedBuffer = new float[480];
+			opusHandler.Decoder.Decode(msg.Data, msg.DataLength, decodedBuffer);
+
+			Settings.TryGetSetting(nameof(VoiceManager.VConfig.Volume3DProximityChat),
+				out float volumeProximityChat);
+
+			for (var i = 0; i < decodedBuffer.Length; i++)
 			{
-				if (hub.roleManager.CurrentRole is SpectatorRole currentRole)
-				{
-					var specId = currentRole.SyncedSpectatedNetId;
-					if (sender.CloseHubsNetIds.Contains(specId) || specId == sender.Hub.netId)
-					{
-						hub.connectionToClient.Send(msg);
-					}
-					continue;
-				}
-				if (!sender.CloseHubsNetIds.Contains(hub.netId)) continue;
-				hub.connectionToClient.Send(msg);
+				decodedBuffer[i] *= volumeProximityChat;
 			}
+
+			var encodedBuffer = new byte[512];
+			var dataLen = opusHandler.Encoder.Encode(decodedBuffer, encodedBuffer);
+
+			var audioMsg = new AudioMessage(sender.SpeakerToy.ControllerId, encodedBuffer, dataLen);
+			foreach (var target in Player.ReadyList)
+			{
+				if (target.RoleBase is not IVoiceRole voiceRole)
+					continue;
+
+				if (voiceRole.VoiceModule.ValidateReceive(sender.Hub, VoiceChatChannel.Proximity) == VoiceChatChannel.None)
+					continue;
+
+				target.ReferenceHub.connectionToClient.Send(audioMsg);
+			}
+
+			return;
+		}
+
+		foreach (var target in Player.ReadyList)
+		{
+			if (target.RoleBase is not IVoiceRole voiceRole)
+				continue;
+
+			var targetPos = target.Position;
+			if (target.RoleBase is SpectatorRole spectatorRole)
+			{
+				targetPos = spectatorRole.DeathPosition.Position;
+				if (target.CurrentlySpectating != null)
+				{
+					targetPos = target.CurrentlySpectating.Position;
+				}
+			}
+
+			var dist = Vector3.Distance(sender.Hub.GetPosition(), targetPos);
+			Settings.TryGetSetting(nameof(VoiceManager.VConfig.MaxProximityDistance), out float maxProximityDistance);
+
+			if (dist >= maxProximityDistance) 
+				continue;
+
+			if (voiceRole.VoiceModule.ValidateReceive(sender.Hub, VoiceChatChannel.Proximity) == VoiceChatChannel.None)
+			 	continue;
+			
+			msg.Channel = VoiceChatChannel.Proximity;
+			target.ReferenceHub.connectionToClient.Send(msg);
 		}
 	}
 }

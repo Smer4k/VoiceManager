@@ -16,15 +16,10 @@ public class Create : ICommand, IUsageProvider
 
 	public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
 	{
-		if (!VoiceManager.AutoInitChatMembers)
-		{
-			response = "Plugin not initialized! Use: groupchat setactive enabled";
-			return false;
-		}
-		
 		if (arguments.Count < 1)
 		{
-			response = "Usage: groupchat create [<group name>]";
+			var usage = string.Join(" ", Array.ConvertAll(Usage, u => $"[{u}]"));
+			response = $"Usage: {GroupChatParent.CommandName} {Command} {usage}";
 			return false;
 		}
 

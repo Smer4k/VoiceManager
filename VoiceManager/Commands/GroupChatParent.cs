@@ -9,13 +9,15 @@ namespace VoiceManager.Commands;
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
 public class GroupChatParent : ParentCommand
 {
-	public override string Command { get; } = "groupchat";
+	public const string CommandName = "GroupChat";
+	public override string Command { get; } = CommandName;
 	public override string[] Aliases { get; } = ["gc"];
 	public override string Description { get; } = "Commands for control group chats";
 	
 	public override void LoadGeneratedCommands()
 	{
-		RegisterCommand(new SetActive());
+		RegisterCommand(new ClearMemory());
+		RegisterCommand(new Settings());
 		RegisterCommand(new Add());
 		RegisterCommand(new Create());
 		RegisterCommand(new Remove());
