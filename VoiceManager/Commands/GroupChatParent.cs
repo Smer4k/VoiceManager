@@ -12,7 +12,7 @@ public class GroupChatParent : ParentCommand
 	public const string CommandName = "GroupChat";
 	public override string Command { get; } = CommandName;
 	public override string[] Aliases { get; } = ["gc"];
-	public override string Description { get; } = "Commands for control group chats";
+	public override string Description { get; } = "Commands for control group chats and proximity chats";
 	
 	public override void LoadGeneratedCommands()
 	{

@@ -14,7 +14,7 @@ public class Add : ICommand, IUsageProvider
 	public string Command { get; } = "add";
 	public string[] Aliases { get; } = ["a"];
 	public string[] Usage { get; } = ["player id", "group id/PROX", "(optional) temp? <y/n>"];
-	public string Description { get; } = "Adds a player to the specified group";
+	public string Description { get; } = "Adds a player to the specified group or permission for proximity chat";
 
 	public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
 	{

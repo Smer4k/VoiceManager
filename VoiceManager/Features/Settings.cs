@@ -80,8 +80,6 @@ public static class Settings
 		value = casted;
 		return true;
 	}
-	
-	
 
 	public new static string ToString()
 	{

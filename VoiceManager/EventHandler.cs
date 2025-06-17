@@ -11,6 +11,7 @@ public class EventHandler : CustomEventsHandler
 	public override void OnServerRoundRestarted()
 	{
 		ChatManager.DeleteAllGroupChats();
+		ChatManager.DeleteAllChatMembers();
 	}
 
 	public override void OnPlayerLeft(PlayerLeftEventArgs ev)
