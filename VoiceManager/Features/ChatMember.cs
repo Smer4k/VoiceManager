@@ -24,7 +24,7 @@ public class ChatMember
 	public bool ProximityChatEnabled { get; private set; }
 	public bool TempProximityChat { get; private set; }
 
-	public ChatMember(ReferenceHub hub)
+	private ChatMember(ReferenceHub hub)
 	{
 		Hub = hub;
 		SpeakerToy = SpeakerToy.Create(hub.GetPosition());
