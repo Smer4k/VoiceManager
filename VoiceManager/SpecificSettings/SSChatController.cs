@@ -32,9 +32,10 @@ public class SSChatController
 	private void ProcessUserInput(ReferenceHub sender, ServerSpecificSettingBase setting)
 	{
 		if (!sender.IsAlive()) return;
+		if (!ChatMember.Contains(sender)) return;
 
 		var member = ChatMember.Get(sender);
-		
+
 		switch (setting.SettingId)
 		{
 			case 0:
@@ -83,7 +84,7 @@ public class SSChatController
 				break;
 		}
 	}
-	
+
 	private static void OnEnableProximityChat(ChatMember member, bool state)
 	{
 		if (!member.ProximityChat)
