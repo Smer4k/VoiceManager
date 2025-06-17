@@ -3,6 +3,7 @@ using LabApi.Features.Wrappers;
 using NorthwoodLib.Pools;
 using PlayerRoles;
 using PlayerRoles.FirstPersonControl;
+using Respawning.Objectives;
 using RueI.Displays;
 using RueI.Elements;
 using RueI.Extensions.HintBuilding;
@@ -93,7 +94,7 @@ public class ChatMember
 
 	public void RemoveAllGroups()
 	{
-		foreach (var group in Groups)
+		foreach (var group in Groups.ToArray())
 		{
 			group.TryRemoveMember(this);
 		}
@@ -245,5 +246,10 @@ public class ChatMember
 		elem.Content = StringBuilderPool.Shared.ToStringReturn(sb);
 		elem.Position = pos;
 		Display.Update();
+	}
+
+	public override string ToString()
+	{
+		return $"{Hub.GetNickname()} | {Hub.GetRoleId()}";
 	}
 }
