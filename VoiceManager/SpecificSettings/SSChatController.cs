@@ -32,10 +32,8 @@ public class SSChatController
 	private void ProcessUserInput(ReferenceHub sender, ServerSpecificSettingBase setting)
 	{
 		if (!sender.IsAlive()) return;
-		if (!ChatMember.Contains(sender)) return;
-
-		var member = ChatMember.Get(sender);
-
+		if (!ChatMember.TryGet(sender, out ChatMember member)) return;
+		
 		switch (setting.SettingId)
 		{
 			case 0:

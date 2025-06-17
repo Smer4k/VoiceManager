@@ -22,7 +22,6 @@ public class ChatMember
 	public bool GroupChatEnabled { get; private set; }
 	public bool ProximityChat { get; private set; }
 	public bool ProximityChatEnabled { get; private set; }
-	public bool TempProximityChat { get; private set; }
 
 	private ChatMember(ReferenceHub hub)
 	{
@@ -31,6 +30,10 @@ public class ChatMember
 		SpeakerToy.ControllerId = (byte)hub.PlayerId;
 		Display = new Display(DisplayCore.Get(hub));
 		Display.Elements.Add(new SetElement(75, ""));
+	}
+	
+	public static bool TryGet(ReferenceHub hub, out ChatMember member)	{
+		return Members.TryGetValue(hub, out member);
 	}
 
 	public static ChatMember Get(ReferenceHub hub)
@@ -44,8 +47,6 @@ public class ChatMember
 	}
 
 	public static ChatMember Get(Player player) => Get(player?.ReferenceHub);
-	public static bool Contains(ReferenceHub hub) => Members.ContainsKey(hub);
-	public static bool Contains(Player player) => Members.ContainsKey(player.ReferenceHub);
 
 	public static void Remove(ReferenceHub hub)
 	{
@@ -184,11 +185,11 @@ public class ChatMember
 		UpdateDisplay();
 	}
 
-	public void SetProximityChat(bool state, bool isTemp = false)
+	public void SetProximityChat(bool state)
 	{
-		if (ProximityChat == state || !Hub.IsSCP()) return;
+		if (ProximityChat == state) return;
+		if (state && !Hub.IsSCP()) return;
 		ProximityChat = state;
-		TempProximityChat = isTemp;
 
 		Settings.TryGetSetting(nameof(VoiceManager.VConfig.MinProximityDistance), out float minProximityDistance);
 		Settings.TryGetSetting(nameof(VoiceManager.VConfig.MaxProximityDistance), out float maxProximityDistance);

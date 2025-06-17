@@ -1,5 +1,6 @@
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.CustomHandlers;
+using LabApi.Features.Extensions;
 using VoiceChat;
 using VoiceManager.Features;
 
@@ -20,11 +21,8 @@ public class EventHandler : CustomEventsHandler
 
 	public override void OnPlayerDeath(PlayerDeathEventArgs ev)
 	{
-		if (!ChatMember.Contains(ev.Player)) return;
-		var member = ChatMember.Get(ev.Player);
-
-		if (member.TempProximityChat)
-			member.SetProximityChat(false);
+		if (!ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member)) 
+			return;
 
 		foreach (var group in member.Groups.ToArray())
 		{
@@ -37,9 +35,8 @@ public class EventHandler : CustomEventsHandler
 		if (ev.Message.Channel is not VoiceChatChannel.ScpChat and not VoiceChatChannel.Proximity)
 			return;
 
-		if (!ChatMember.Contains(ev.Player)) return;
-
-		var member = ChatMember.Get(ev.Player);
+		if (!ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member)) 
+			return;
 
 		if (member.ProximityChatEnabled)
 		{
@@ -60,13 +57,13 @@ public class EventHandler : CustomEventsHandler
 
 	public override void OnPlayerChangingRole(PlayerChangingRoleEventArgs ev)
 	{
-		ChatMember member = null;
-
-		if (ChatMember.Contains(ev.Player))
-			member = ChatMember.Get(ev.Player);
+		ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member);
 
 		if (member != null)
 		{
+			if (!ev.NewRole.IsScp())
+				member.SetProximityChat(false);
+			
 			member.SetProximityChatEnabled(false);
 			member.SetGroupChatEnabled(false);
 		}
@@ -77,7 +74,6 @@ public class EventHandler : CustomEventsHandler
 			member ??= ChatMember.Get(ev.Player);
 			member.SetProximityChat(true);
 		}
-
 
 		if (VoiceManager.VConfig.SendBroadcastOnRoleChange)
 		{
