@@ -95,7 +95,7 @@ public static class ChatManager
 
 		if (!sender.ProximityChat || !sender.ProximityChatEnabled || !sender.Hub.IsAlive()) return;
 
-		Settings.TryGetSetting(nameof(VoiceManager.VConfig.Use3DProximityChat), out bool use3DProximityChat);
+		Settings.TryGetSetting(nameof(VoiceEntry.Config.Use3DProximityChat), out bool use3DProximityChat);
 
 		if (use3DProximityChat)
 		{
@@ -105,7 +105,7 @@ public static class ChatManager
 			var decodedBuffer = new float[480];
 			opusHandler.Decoder.Decode(msg.Data, msg.DataLength, decodedBuffer);
 
-			Settings.TryGetSetting(nameof(VoiceManager.VConfig.Volume3DProximityChat),
+			Settings.TryGetSetting(nameof(VoiceEntry.Config.Volume3DProximityChat),
 				out float volumeProximityChat);
 
 			for (var i = 0; i < decodedBuffer.Length; i++)
@@ -147,7 +147,7 @@ public static class ChatManager
 			}
 
 			var dist = Vector3.Distance(sender.Hub.GetPosition(), targetPos);
-			Settings.TryGetSetting(nameof(VoiceManager.VConfig.MaxProximityDistance), out float maxProximityDistance);
+			Settings.TryGetSetting(nameof(VoiceEntry.Config.MaxProximityDistance), out float maxProximityDistance);
 
 			if (dist >= maxProximityDistance) 
 				continue;

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using PlayerRoles;
+using UnityEngine;
 
 namespace VoiceManager;
 
@@ -28,12 +29,10 @@ public class Config
 		RoleTypeId.Scp3114,
 	];
 	
-	[Description("Use default plugin hints when enabling/disabling chats? Disable if you have your own hint implementation.")]
-	public bool UseDefaultHints { get; set; } = true;
-
-	[Description("Use default Server-Specific in plugin? Disable if you have your own Server-Specific for this plugin.")]
-	public bool UseDefaultServerSpecific { get; set; } = true;
+	[Description("Coordinates where the hint will be")]
+	public Vector2 HintPosition { get; set; } = new Vector2(55, 1070);
+	[Description("Text size hint")]
+	public int HintSize { get; set; } = 25;
 	public bool SendBroadcastOnRoleChange { get; set; } = false;
 	public ushort BroadcastDuration { get; set; } = 5;
-	public string BroadcastMessage { get; set; } = "<b>You can enable Proximity Chat, set the key to <color=red>Server-specific</color></b>.";
 }

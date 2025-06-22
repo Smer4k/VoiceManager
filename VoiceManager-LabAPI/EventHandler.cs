@@ -2,6 +2,7 @@ using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features.Extensions;
 using VoiceChat;
+using VoiceChat.Networking;
 using VoiceManager.Features;
 
 namespace VoiceManager;
@@ -22,7 +23,7 @@ public class EventHandler : CustomEventsHandler
 
 	public override void OnPlayerDeath(PlayerDeathEventArgs ev)
 	{
-		if (!ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member)) 
+		if (!ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member))
 			return;
 
 		foreach (var group in member.Groups.ToArray())
@@ -31,12 +32,20 @@ public class EventHandler : CustomEventsHandler
 		}
 	}
 
+	public override void OnPlayerUsedIntercom(PlayerUsedIntercomEventArgs ev)
+	{
+		if (!ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member))
+			return;
+		member.SetGroupChatEnabled(false);
+	}
+
 	public override void OnPlayerSendingVoiceMessage(PlayerSendingVoiceMessageEventArgs ev)
 	{
-		if (ev.Message.Channel is not VoiceChatChannel.ScpChat and not VoiceChatChannel.Proximity)
+		if (ev.Message.Channel is not VoiceChatChannel.ScpChat and not VoiceChatChannel.Proximity
+		    and not VoiceChatChannel.Spectator)
 			return;
 
-		if (!ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member)) 
+		if (!ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member))
 			return;
 
 		if (member.ProximityChatEnabled)
@@ -64,23 +73,22 @@ public class EventHandler : CustomEventsHandler
 		{
 			if (!ev.NewRole.IsScp())
 				member.SetProximityChat(false);
-			
+
 			member.SetProximityChatEnabled(false);
 			member.SetGroupChatEnabled(false);
 		}
 
-		if (VoiceManager.VConfig.AutoInitProximityChatRoles &&
-		    VoiceManager.VConfig.ProximityChatRoles.Contains(ev.NewRole))
+		if (VoiceEntry.Instance.Config.AutoInitProximityChatRoles &&
+		    VoiceEntry.Instance.Config.ProximityChatRoles.Contains(ev.NewRole))
 		{
 			member ??= ChatMember.Get(ev.Player);
 			member.SetProximityChat(true);
 		}
 
-		if (VoiceManager.VConfig.SendBroadcastOnRoleChange)
+		if (VoiceEntry.Instance.Config.SendBroadcastOnRoleChange)
 		{
-			ev.Player.SendBroadcast(VoiceManager.VConfig.BroadcastMessage, VoiceManager.VConfig.BroadcastDuration);
+			ev.Player.SendBroadcast(VoiceEntry.Instance.Translation.BroadcastMessage,
+				VoiceEntry.Instance.Config.BroadcastDuration);
 		}
-
-		member?.UpdateDisplay();
 	}
 }

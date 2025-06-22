@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("VoiceManager")]
+[assembly: AssemblyTitle("VoiceManager-Exiled")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("VoiceManager")]
+[assembly: AssemblyProduct("VoiceManager-Exiled")]
 [assembly: AssemblyCopyright("Copyright ©  2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("0D1E79AE-A564-4426-909D-5D639833BD5D")]
+[assembly: Guid("A97DC34C-1FEB-4F75-BA9B-CEFCFCF30856")]
 
 // Version information for an assembly consists of the following four values:
 //

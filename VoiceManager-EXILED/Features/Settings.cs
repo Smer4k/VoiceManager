@@ -12,7 +12,7 @@ public static class Settings
 	public static void InitDefault()
 	{
 		Storage.Clear();
-		var config = VoiceManager.VConfig;
+		var config = VoiceEntry.Instance.Config;
 		Storage.Add(nameof(config.Use3DProximityChat), config.Use3DProximityChat);
 		Storage.Add(nameof(config.Volume3DProximityChat), config.Volume3DProximityChat);
 		Storage.Add(nameof(config.MinProximityDistance), config.MinProximityDistance);
