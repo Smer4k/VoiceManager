@@ -5,7 +5,7 @@
     <PropertyGroup>
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{C948F4F3-9684-460A-B5AE-6A0DFF869111}</ProjectGuid>
+        <ProjectGuid>{A97DC34C-1FEB-4F75-BA9B-CEFCFCF30856}</ProjectGuid>
         <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>VoiceManager</RootNamespace>
