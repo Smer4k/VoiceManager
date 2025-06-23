@@ -20,6 +20,7 @@ public class ChatMember
 	public bool GroupChatEnabled { get; private set; }
 	public bool ProximityChat { get; private set; }
 	public bool ProximityChatEnabled { get; private set; }
+	public bool UsingIntercom { get; set; }
 	public static Action<ReferenceHub> OnMemberAdded { get; set; }
 	public static Action<ReferenceHub> OnMemberRemoved { get; set; }
 	public static Action<ChatMember> OnMemberChanged { get; set; }
@@ -179,7 +180,7 @@ public class ChatMember
 
 	public void SetGroupChatEnabled(bool value)
 	{
-		if (Groups.Count < 1)
+		if (Groups.Count < 1 || UsingIntercom)
 			return;
 		GroupChatEnabled = value;
 		OnMemberChanged?.Invoke(this);

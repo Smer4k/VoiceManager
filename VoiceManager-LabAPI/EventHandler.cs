@@ -32,11 +32,19 @@ public class EventHandler : CustomEventsHandler
 		}
 	}
 
-	public override void OnPlayerUsedIntercom(PlayerUsedIntercomEventArgs ev)
+	public override void OnPlayerUsingIntercom(PlayerUsingIntercomEventArgs ev)
 	{
 		if (!ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member))
 			return;
 		member.SetGroupChatEnabled(false);
+		member.UsingIntercom = true;
+	}
+
+	public override void OnPlayerUsedIntercom(PlayerUsedIntercomEventArgs ev)
+	{
+		if (!ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member))
+			return;
+		member.UsingIntercom = false;
 	}
 
 	public override void OnPlayerSendingVoiceMessage(PlayerSendingVoiceMessageEventArgs ev)
