@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text;
+using VoiceManager.Features.EventArgs;
 
 namespace VoiceManager.Features;
 
@@ -17,6 +18,7 @@ public static class Settings
 		Storage.Add(nameof(config.Volume3DProximityChat), config.Volume3DProximityChat);
 		Storage.Add(nameof(config.MinProximityDistance), config.MinProximityDistance);
 		Storage.Add(nameof(config.MaxProximityDistance), config.MaxProximityDistance);
+		Storage.Add(nameof(config.DisplayGroupMembers), config.DisplayGroupMembers);
 	}
 
 	public static bool TrySetSetting(string key, string value)
@@ -36,6 +38,10 @@ public static class Settings
 
 			var newValue = converter.ConvertFromString(null, CultureInfo.InvariantCulture, value);
 
+			ChangingSettingEventArgs ev = Events.OnChangingSetting(key, value);
+			if (!ev.IsAllowed)
+				return false;
+			
 			Storage[key] = newValue;
 			return true;
 		}
@@ -55,6 +61,10 @@ public static class Settings
 		
 		if (!targetType.IsInstanceOfType(value)) return false;
 
+		ChangingSettingEventArgs ev = Events.OnChangingSetting(key, value);
+		if (!ev.IsAllowed)
+			return false;
+		
 		Storage[key] = value;
 		return true;
 	}

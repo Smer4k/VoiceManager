@@ -56,7 +56,7 @@ public class SSChatController
 				{
 					if (!ssKeybindSetting1.SyncIsPressed)
 						break;
-					OnEnableProximityChat(member, !member.ProximityChatEnabled);
+					OnEnableProximityChat(member, !member.ProximityChat);
 					break;
 				}
 
@@ -69,7 +69,7 @@ public class SSChatController
 				{
 					if (!ssKeybindSetting2.SyncIsPressed)
 						break;
-					OnEnableGroupChat(member, !member.GroupChatEnabled);
+					OnEnableGroupChat(member, !member.GroupChat);
 					break;
 				}
 
@@ -98,19 +98,19 @@ public class SSChatController
 
 	public static void OnEnableProximityChat(ChatMember member, bool state)
 	{
-		member.SetProximityChatEnabled(state);
-		if (member.GroupChatEnabled)
+		member.SetProximityChat(state);
+		if (member.GroupChat)
 		{
-			member.SetGroupChatEnabled(false);
+			member.SetGroupChat(false);
 		}
 	}
 
 	public static void OnEnableGroupChat(ChatMember member, bool state)
 	{
-		member.SetGroupChatEnabled(state);
-		if (member.ProximityChatEnabled)
+		member.SetGroupChat(state);
+		if (member.ProximityChat)
 		{
-			member.SetProximityChatEnabled(false);
+			member.SetProximityChat(false);
 		}
 	}
 }

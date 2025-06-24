@@ -74,8 +74,8 @@ public class Add : ICommand, IUsageProvider
 				continue;
 			}
 
-			if (member.ProximityChat || !member.Hub.IsSCP()) continue;
-			member.SetProximityChat(true);
+			if (member.HasProximityChat || !member.Hub.IsSCP()) continue;
+			member.SetHasProximityChat(true);
 			countAdded++;
 		}
 

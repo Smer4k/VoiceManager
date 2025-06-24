@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Exiled.API.Features;
 using NorthwoodLib.Pools;
+using VoiceManager.Features.EventArgs;
 
 namespace VoiceManager.Features;
 
@@ -19,7 +20,11 @@ public class GroupChat
 
 	public bool TryAddMember(ChatMember member, bool isTemp = false)
 	{
-		if (isTemp)
+		AddingGroupMemberEventArgs ev = Events.OnAddingGroupMember(member, this, isTemp);
+		if (!ev.IsAllowed)
+			return false;
+		
+		if (ev.IsTemp)
 		{
 			Members.Remove(member);
 			if (!TempMembers.Add(member))
@@ -33,7 +38,8 @@ public class GroupChat
 		}
 
 		member.AddGroup(this);
-		return true;
+		Events.OnAddedGroupMember(member, this);
+		return false;
 	}
 	
 	public bool TryAddMember(Player player, bool isTemp = false)
@@ -48,12 +54,17 @@ public class GroupChat
 
 	public bool TryRemoveMember(ChatMember member)
 	{
+		RemovingGroupMemberEventArgs ev = Events.OnRemovingGroupMember(member, this);
+		if (!ev.IsAllowed)
+			return false;
+		
 		if (!TempMembers.Remove(member) && !Members.Remove(member))
 		{
 			return false;
 		}
 	
 		member.RemoveGroup(this);
+		Events.OnRemovedGroupMember(member, this);
 		return true;
 	}
 	
@@ -71,18 +82,16 @@ public class GroupChat
 	{
 		foreach (var member in TempMembers)
 		{
-			member.RemoveGroup(this);
+			TryRemoveMember(member);
 		}
-		TempMembers.Clear();
 	}
 
 	public void RemoveAllMembers()
 	{
 		foreach (var member in Members)
 		{
-			member.RemoveGroup(this);
+			TryRemoveMember(member);
 		}
-		Members.Clear();
 	}
 
 	public void SetName(string value)
@@ -101,6 +110,10 @@ public class GroupChat
 		foreach (var member in Members)
 		{
 			sb.AppendLine(member.ToString());
+		}
+		foreach (var member in TempMembers)
+		{
+			sb.AppendLine($"{member}");
 		}
 		return StringBuilderPool.Shared.ToStringReturn(sb);
 	}

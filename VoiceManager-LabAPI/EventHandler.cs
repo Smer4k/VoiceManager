@@ -36,7 +36,7 @@ public class EventHandler : CustomEventsHandler
 	{
 		if (!ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member))
 			return;
-		member.SetGroupChatEnabled(false);
+		member.SetGroupChat(false);
 		member.UsingIntercom = true;
 	}
 
@@ -56,7 +56,7 @@ public class EventHandler : CustomEventsHandler
 		if (!ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member))
 			return;
 
-		if (member.ProximityChatEnabled)
+		if (member.ProximityChat)
 		{
 			ChatManager.SendMessage(member, ev.Message);
 			ev.IsAllowed = false;
@@ -66,7 +66,7 @@ public class EventHandler : CustomEventsHandler
 		if (member.Groups.Count < 1)
 			return;
 
-		if (!member.GroupChatEnabled)
+		if (!member.GroupChat)
 			return;
 
 		ChatManager.SendMessage(member, ev.Message);
@@ -80,17 +80,17 @@ public class EventHandler : CustomEventsHandler
 		if (member != null)
 		{
 			if (!ev.NewRole.IsScp())
-				member.SetProximityChat(false);
+				member.SetHasProximityChat(false);
 
-			member.SetProximityChatEnabled(false);
-			member.SetGroupChatEnabled(false);
+			member.SetProximityChat(false);
+			member.SetGroupChat(false);
 		}
 
 		if (VoiceEntry.Instance.Config.AutoInitProximityChatRoles &&
 		    VoiceEntry.Instance.Config.ProximityChatRoles.Contains(ev.NewRole))
 		{
 			member ??= ChatMember.Get(ev.Player);
-			member.SetProximityChat(true);
+			member.SetHasProximityChat(true);
 		}
 
 		if (VoiceEntry.Instance.Config.SendBroadcastOnRoleChange)

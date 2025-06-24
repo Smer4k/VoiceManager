@@ -36,7 +36,7 @@ public class Delete : ICommand, IUsageProvider
 			return false;
 		}
 
-		if (ChatManager.DeleteGroupChat(groupId))
+		if (ChatManager.RemoveGroupChat(groupId))
 		{
 			response = $"Group with ID {groupId} has been removed.";
 			return true;

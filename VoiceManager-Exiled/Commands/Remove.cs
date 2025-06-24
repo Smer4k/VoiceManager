@@ -62,8 +62,8 @@ public class Remove : ICommand, IUsageProvider
 				continue;
 			}
 
-			if (!member.ProximityChat) continue;
-			member.SetProximityChat(false);
+			if (!member.HasProximityChat) continue;
+			member.SetHasProximityChat(false);
 			countRemoved++;
 		}
 

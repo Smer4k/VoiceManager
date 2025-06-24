@@ -14,6 +14,9 @@ public class Config
 	public float MinProximityDistance { get; set; } = 2f;
 	public float MaxProximityDistance { get; set; } = 10f;
 	
+	[Description("Whether to display the list of members in the group on the screen")]
+	public bool DisplayGroupMembers { get; set; } = true;
+	
 	[Description("Automatically add players with allowed role")]
 	public bool AutoInitProximityChatRoles { get; set; } = false;
 

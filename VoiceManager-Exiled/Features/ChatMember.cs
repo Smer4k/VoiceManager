@@ -6,6 +6,7 @@ using NorthwoodLib.Pools;
 using PlayerRoles;
 using PlayerRoles.FirstPersonControl;
 using Respawning.Objectives;
+using VoiceManager.Features.EventArgs;
 using SpeakerToy = LabApi.Features.Wrappers.SpeakerToy;
 
 namespace VoiceManager.Features;
@@ -18,12 +19,9 @@ public class ChatMember
 	public HashSet<GroupChat> MutedGroups { get; } = new();
 	public GroupChat CurrentGroup { get; private set; }
 	public SpeakerToy SpeakerToy { get; }
-	public bool GroupChatEnabled { get; private set; }
+	public bool GroupChat { get; private set; }
+	public bool HasProximityChat { get; private set; }
 	public bool ProximityChat { get; private set; }
-	public bool ProximityChatEnabled { get; private set; }
-	public static Action<ReferenceHub> OnMemberAdded { get; set; }
-	public static Action<ReferenceHub> OnMemberRemoved { get; set; }
-	public static Action<ChatMember> OnMemberChanged { get; set; }
 
 	private ChatMember(ReferenceHub hub)
 	{
@@ -40,15 +38,15 @@ public class ChatMember
 	{
 		if (Members.TryGetValue(hub, out var value))
 			return value;
+		
+		CreatingChatMemberEventArgs ev = Events.OnCreatingChatMember(hub);
+		if (!ev.IsAllowed)
+			return null;
 
 		var member = new ChatMember(hub);
-		if (Members.Count == 0)
-		{
-			OnMemberAdded += HintProvider.Provider.CreateHint;
-			OnMemberRemoved += HintProvider.Provider.RemoveHint;
-		}
 		Members.Add(hub, member);
-		OnMemberAdded?.Invoke(hub);
+		HintProvider.CreateHint(hub);
+		Events.OnCreatedChatMember(member);
 		return member;
 	}
 
@@ -57,36 +55,32 @@ public class ChatMember
 	public static void Remove(ReferenceHub hub)
 	{
 		if (!Members.TryGetValue(hub, out var member)) return;
-		member.SetProximityChat(false);
+		RemovingChatMemberEventArgs ev = Events.OnRemovingChatMember(member);
+		if (!ev.IsAllowed)
+			return;
+		
+		member.SetHasProximityChat(false);
 		member.RemoveAllGroups();
 		member.SpeakerToy.Destroy();
-		OnMemberRemoved?.Invoke(hub);
-		if (Members.Count == 1)
-		{
-			OnMemberAdded -= HintProvider.Provider.CreateHint;
-			OnMemberRemoved -= HintProvider.Provider.RemoveHint;
-		}
+		HintProvider.RemoveHint(hub);
 		Members.Remove(hub);
+		Events.OnRemovedChatMember(hub);
 	}
 
 	public static void Remove(Player player) => Remove(player?.ReferenceHub);
 
-	public bool AddGroup(GroupChat group)
+	internal void AddGroup(GroupChat group)
 	{
-		if (Groups.Contains(group))
-			return false;
 		Groups.Add(group);
 		if (CurrentGroup == null)
 		{
 			SetCurrentGroup(group);
 		}
-
-		return true;
 	}
 
-	public bool RemoveGroup(GroupChat group)
+	internal void RemoveGroup(GroupChat group)
 	{
-		if (!Groups.Remove(group)) return false;
+		Groups.Remove(group);
 		MutedGroups.Remove(group);
 		if (Groups.Count > 0)
 		{
@@ -97,8 +91,6 @@ public class ChatMember
 		{
 			SetCurrentGroup(null);
 		}
-
-		return true;
 	}
 
 	public void RemoveAllGroups()
@@ -107,12 +99,14 @@ public class ChatMember
 		{
 			group.TryRemoveMember(this);
 		}
-
-		Groups.Clear();
 	}
 
 	public bool SetMuteCurrentGroup(bool mute)
 	{
+		ChangingMuteGroupEventArgs ev = Events.OnChangingMuteGroup(this, IsGroupMuted(CurrentGroup), mute);
+		if (!ev.IsAllowed)
+			return false;
+		
 		if (mute)
 		{
 			if (!MutedGroups.Add(CurrentGroup)) return false;
@@ -120,20 +114,23 @@ public class ChatMember
 		}
 
 		if (!MutedGroups.Remove(CurrentGroup)) return false;
-		OnMemberChanged?.Invoke(this);
 		return true;
 	}
 
 	public bool SetMuteGroup(GroupChat groupChat, bool mute)
 	{
-		if (mute && IsGroupMuted(groupChat))
+		var isGroupMuted = IsGroupMuted(groupChat);
+		if (mute && isGroupMuted)
+			return false;
+		
+		ChangingMuteGroupEventArgs ev = Events.OnChangingMuteGroup(this, isGroupMuted, mute);
+		if (!ev.IsAllowed)
 			return false;
 			
 		foreach (var group in Groups)
 		{
 			if (!group.Equals(groupChat)) continue;
 			var result = mute ? MutedGroups.Add(group) : MutedGroups.Remove(group);
-			OnMemberChanged?.Invoke(this);
 			return result;
 		}
 
@@ -171,40 +168,54 @@ public class ChatMember
 		if (CurrentGroup != null && CurrentGroup.Equals(group))
 			return;
 
+		ChangingCurrentGroupEventArgs ev = Events.OnChangingCurrentGroup(this, CurrentGroup, group);
+		if (!ev.IsAllowed)
+			return;
+		
 		CurrentGroup = group;
-		OnMemberChanged?.Invoke(this);
 	}
 
-	public void SetGroupChatEnabled(bool value)
+	public void SetGroupChat(bool value)
 	{
 		if (Groups.Count < 1)
 			return;
-		GroupChatEnabled = value;
-		OnMemberChanged?.Invoke(this);
+		
+		ChangingGroupChatEventArgs ev = Events.OnChangingGroupChat(this, GroupChat, value);
+		if (!ev.IsAllowed)
+			return;
+		
+		GroupChat = value;
 	}
 
-	public void SetProximityChatEnabled(bool value)
+	public void SetProximityChat(bool value)
 	{
-		if (!ProximityChat || !Hub.IsSCP())
+		if (!HasProximityChat || !Hub.IsSCP())
+			return;
+		
+		ChangingProximityChatEventArgs ev = Events.OnChangingProximityChat(this, ProximityChat, value);
+		if (!ev.IsAllowed)
 			return;
 		
 		Settings.TryGetSetting(nameof(VoiceEntry.Config.MinProximityDistance), out float minProximityDistance);
 		Settings.TryGetSetting(nameof(VoiceEntry.Config.MaxProximityDistance), out float maxProximityDistance);
 		SpeakerToy.MinDistance = minProximityDistance;
 		SpeakerToy.MaxDistance = maxProximityDistance;
-
-		ProximityChatEnabled = value;
-		OnMemberChanged?.Invoke(this);
+		
+		ProximityChat = value;
 	}
 
-	public void SetProximityChat(bool state)
+	public void SetHasProximityChat(bool value)
 	{
-		if (ProximityChat == state) return;
-		if (state && !Hub.IsSCP()) return;
-		ProximityChat = state;
+		if (HasProximityChat == value) return;
+		if (value && !Hub.IsSCP()) return;
+		
+		ChangingHasProximityChatEventArgs ev = Events.OnChangingHasProximityChat(this, HasProximityChat, value);
+		if (!ev.IsAllowed)
+			return;
+		
+		HasProximityChat = value;
 
-		if (!state) ProximityChatEnabled = false;
-		OnMemberChanged?.Invoke(this);
+		if (!value) ProximityChat = false;
 	}
 
 	public static string GetHintText(ReferenceHub hub)
@@ -212,7 +223,7 @@ public class ChatMember
 		if (!ChatMember.TryGet(hub, out var member))
 			return "";
 		
-		if (!member.ProximityChat && member.Groups.Count < 1)
+		if (!member.HasProximityChat && member.Groups.Count < 1)
 			return "";
 		
 		var sb = StringBuilderPool.Shared.Rent();
@@ -223,7 +234,7 @@ public class ChatMember
 			var mutedColor = member.IsGroupMuted(member.CurrentGroup)
 				? "<color=green>True</color>"
 				: "<color=red>False</color>";
-			var chatColor = member.GroupChatEnabled
+			var chatColor = member.GroupChat
 				? "<color=green>Enabled</color>"
 				: "<color=red>Disabled</color>";
 			
@@ -238,9 +249,9 @@ public class ChatMember
 			sb.AppendLine(line);
 		}
 
-		if (member.ProximityChat)
+		if (member.HasProximityChat)
 		{
-			var proxColor = member.ProximityChatEnabled
+			var proxColor = member.ProximityChat
 				? "<color=green>Enabled</color>"
 				: "<color=red>Disabled</color>";
 			

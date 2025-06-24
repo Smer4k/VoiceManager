@@ -7,25 +7,9 @@ namespace VoiceManager.Features;
 
 public static class HintProvider
 {
-	public static IHintProvider Provider { get; } = GetProvider();
-
-	private static IHintProvider GetProvider()
-	{
-		return new ServiceMeowHintProvider();
-	}
-}
-
-public interface IHintProvider
-{
-	public void CreateHint(ReferenceHub hub);
-	public void RemoveHint(ReferenceHub hub);
-}
-
-public class ServiceMeowHintProvider : IHintProvider
-{
-	public Dictionary<ReferenceHub, DynamicHint> Hints { get; } = new();
+	public static Dictionary<ReferenceHub, DynamicHint> Hints { get; } = new();
 	
-	public void CreateHint(ReferenceHub hub)
+	public static void CreateHint(ReferenceHub hub)
 	{
 		if (Hints.TryGetValue(hub, out var hint)) 
 			return;
@@ -42,7 +26,7 @@ public class ServiceMeowHintProvider : IHintProvider
 		PlayerDisplay.Get(hub).AddHint(hint);
 	}
 	
-	public void RemoveHint(ReferenceHub hub)
+	public static void RemoveHint(ReferenceHub hub)
 	{
 		if (!Hints.TryGetValue(hub, out var hint)) return;
 		PlayerDisplay.Get(hub).RemoveHint(hint);

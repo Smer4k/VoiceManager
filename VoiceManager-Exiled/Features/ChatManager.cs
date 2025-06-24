@@ -8,6 +8,7 @@ using PlayerRoles.Voice;
 using UnityEngine;
 using VoiceChat;
 using VoiceChat.Networking;
+using VoiceManager.Features.EventArgs;
 
 namespace VoiceManager.Features;
 
@@ -17,6 +18,9 @@ public static class ChatManager
 	
 	public static GroupChat CreateGroupChat(int id, string name)
 	{
+		CreatingGroupEventArgs ev = Events.OnCreatingGroup(id, name);
+		if (!ev.IsAllowed)
+			return null;
 		var chatGroup = new GroupChat(id, name);
 		return Groups.Add(chatGroup) ? chatGroup : null;
 	}
@@ -30,20 +34,36 @@ public static class ChatManager
 			newId++;
 		}
 
+		CreatingGroupEventArgs ev = Events.OnCreatingGroup(newId, name);
+		if (!ev.IsAllowed)
+			return null;
+		
 		var groupChat = new GroupChat(newId, name);
 		Groups.Add(groupChat);
 		return groupChat;
 	}
 	
-	public static bool DeleteGroupChat(int id)
+	public static bool RemoveGroupChat(GroupChat groupChat)
+	{
+		if (groupChat == null)
+			return false;
+
+		RemovingGroupEventArgs ev = Events.OnRemovingGroup(groupChat);
+		if (!ev.IsAllowed)
+			return false;
+		
+		groupChat.RemoveAllMembers();
+		groupChat.RemoveAllTempMembers();
+
+		return Groups.Remove(groupChat);
+	}
+	
+	public static bool RemoveGroupChat(int id)
 	{
 		foreach (var group in Groups)
 		{
 			if (group.Id != id) continue;
-			group.RemoveAllMembers();
-			group.RemoveAllTempMembers();
-
-			return Groups.Remove(group);
+			return RemoveGroupChat(group);
 		}
 
 		return false;
@@ -82,7 +102,7 @@ public static class ChatManager
 
 	public static void SendMessage(ChatMember sender, VoiceMessage msg)
 	{
-		if (sender.CurrentGroup != null && sender.GroupChatEnabled)
+		if (sender.CurrentGroup != null && sender.GroupChat)
 		{
 			msg.Channel = VoiceChatChannel.RoundSummary;
 			foreach (var target in sender.CurrentGroup.Members)
@@ -93,7 +113,7 @@ public static class ChatManager
 			}
 		}
 
-		if (!sender.ProximityChat || !sender.ProximityChatEnabled || !sender.Hub.IsAlive()) return;
+		if (!sender.HasProximityChat || !sender.ProximityChat || !sender.Hub.IsAlive()) return;
 
 		Settings.TryGetSetting(nameof(VoiceEntry.Config.Use3DProximityChat), out bool use3DProximityChat);
 		
