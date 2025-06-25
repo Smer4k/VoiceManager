@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Exiled.API.Interfaces;
 
 namespace VoiceManager;
@@ -18,6 +20,31 @@ public class Translation : ITranslation
 	public string ServerSpecificActivationModeA { get; set; } = "Toggle";
 	public string ServerSpecificActivationModeB { get; set; } = "Hold";
 	public string BroadcastMessage { get; set; } = "<b>You can enable Proximity Chat, set the key to <color=red>Server-specific</color></b>.";
-	public string HintGroup { get; set; } = "Current group: {groupName}\nMuted: {muted}\nGroup chat: {enabled}";
-	public string HintProximity { get; set; } = "Proximity chat: {proximity}";
+	public string HintGroup { get; set; } = "<align=\"left\">Current group: {groupName}\nMute: {muted}\nGroup chat: {enabled}</align>";
+	public string HintProximity { get; set; } = "<align=\"left\">Proximity chat: {proximity}</align>";
+	public string HintGroupMembers { get; set; } = "<align=\"left\">{icon}{nickname:12}|{role}</align>";
+}
+
+public static class TranslationParser
+{
+	public static string ParseTemplate(string template, Dictionary<string, string> values)
+	{
+		var pattern = new Regex(@"\{(\w+)(?::(\d+))?\}");
+
+		return pattern.Replace(template, m =>
+		{
+			var key = m.Groups[1].Value;
+			var maxLenGroup = m.Groups[2];
+			if (!values.TryGetValue(key, out var val))
+				return m.Value;
+
+			if (maxLenGroup.Success && int.TryParse(maxLenGroup.Value, out var maxLen))
+			{
+				if (val.Length > maxLen)
+					return val.Substring(0, maxLen) + "…";
+			}
+
+			return val;
+		});
+	}
 }

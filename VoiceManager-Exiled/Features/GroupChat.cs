@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Exiled.API.Features;
 using NorthwoodLib.Pools;
+using PlayerRoles;
+using Respawning.Objectives;
 using VoiceManager.Features.EventArgs;
 
 namespace VoiceManager.Features;
@@ -107,13 +109,27 @@ public class GroupChat
 	public string GetAllMembersText()
 	{
 		var sb = StringBuilderPool.Shared.Rent();
+		
+		Dictionary<string, string> values = new()
+		{
+			["icon"] = "\ud83d\udd08",
+			["nickname"] = "test",
+			["role"] = "",
+		};
+
 		foreach (var member in Members)
 		{
-			sb.AppendLine(member.ToString());
+			values["icon"] = member.IsGroupMuted(this) ? "\ud83d\udd07" : "\ud83d\udd08";
+			values["nickname"] = member.Hub.GetNickname();
+			values["role"] = member.Hub.GetRoleId().ToString();
+			sb.AppendLine(TranslationParser.ParseTemplate(VoiceEntry.Instance.Translation.HintGroupMembers, values));
 		}
 		foreach (var member in TempMembers)
 		{
-			sb.AppendLine($"{member}");
+			values["icon"] = member.IsGroupMuted(this) ? "\ud83d\udd07" : "\ud83d\udd08";
+			values["nickname"] = member.Hub.GetNickname();
+			values["role"] = member.Hub.GetRoleId().ToString();
+			sb.AppendLine(TranslationParser.ParseTemplate(VoiceEntry.Instance.Translation.HintGroupMembers, values));
 		}
 		return StringBuilderPool.Shared.ToStringReturn(sb);
 	}

@@ -32,7 +32,7 @@ public class Add : ICommand, IUsageProvider
 		{
 			if (!int.TryParse(id, out int playerId)) continue;
 			var player = Player.Get(playerId);
-			if (player == null) continue;
+			if (player == null || player.IsHost) continue;
 			members.Add(ChatMember.Get(player));
 		}
 

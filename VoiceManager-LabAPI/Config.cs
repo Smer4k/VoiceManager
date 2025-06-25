@@ -15,7 +15,7 @@ public class Config
 	public float MaxProximityDistance { get; set; } = 10f;
 	
 	[Description("Whether to display the list of members in the group on the screen")]
-	public bool DisplayGroupMembers { get; set; } = true;
+	public bool DisplayGroupMembers { get; set; } = false;
 	
 	[Description("Automatically add players with allowed role")]
 	public bool AutoInitProximityChatRoles { get; set; } = false;
@@ -31,11 +31,16 @@ public class Config
 		RoleTypeId.Scp939,
 		RoleTypeId.Scp3114,
 	];
-	
+	[Description("Will the plugin immediately create hints by default?")]
+	public bool AutoDefaultHints { get; set; } = true;
 	[Description("Coordinates where the hint will be")]
 	public Vector2 HintPosition { get; set; } = new Vector2(55, 1070);
 	[Description("Text size hint")]
 	public int HintSize { get; set; } = 25;
+	[Description("Coordinates where the hint will be")]
+	public Vector2 HintPositionGroupMembers { get; set; } = new Vector2(-350, 800);
+	[Description("Text size hint")]
+	public int HintSizeGroupMembers { get; set; } = 21;
 	public bool SendBroadcastOnRoleChange { get; set; } = false;
 	public ushort BroadcastDuration { get; set; } = 5;
 }

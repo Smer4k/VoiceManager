@@ -36,6 +36,7 @@ public class ChatMember
 
 	public static ChatMember Get(ReferenceHub hub)
 	{
+		if (hub.IsHost) return null;
 		if (Members.TryGetValue(hub, out var value))
 			return value;
 		
@@ -45,7 +46,7 @@ public class ChatMember
 
 		var member = new ChatMember(hub);
 		Members.Add(hub, member);
-		HintProvider.CreateHint(hub);
+		if (VoiceEntry.Instance.Config.AutoDefaultHints) HintProvider.CreateDefaultHints(hub);
 		Events.OnCreatedChatMember(member);
 		return member;
 	}
@@ -62,7 +63,7 @@ public class ChatMember
 		member.SetHasProximityChat(false);
 		member.RemoveAllGroups();
 		member.SpeakerToy.Destroy();
-		HintProvider.RemoveHint(hub);
+		if (VoiceEntry.Instance.Config.AutoDefaultHints) HintProvider.RemoveHints(hub);
 		Members.Remove(hub);
 		Events.OnRemovedChatMember(hub);
 	}
@@ -218,17 +219,16 @@ public class ChatMember
 		if (!value) ProximityChat = false;
 	}
 
-	public static string GetHintText(ReferenceHub hub)
+	public static string GetHintInfoText(ReferenceHub hub)
 	{
 		if (!ChatMember.TryGet(hub, out var member))
 			return "";
-		
+
 		if (!member.HasProximityChat && member.Groups.Count < 1)
 			return "";
-		
+
 		var sb = StringBuilderPool.Shared.Rent();
-		sb.Append("<align=\"left\">");
-		
+
 		if (member.CurrentGroup != null && member.Groups.Count > 0)
 		{
 			var mutedColor = member.IsGroupMuted(member.CurrentGroup)
@@ -237,15 +237,15 @@ public class ChatMember
 			var chatColor = member.GroupChat
 				? "<color=green>Enabled</color>"
 				: "<color=red>Disabled</color>";
-			
+
 			var groupValues = new Dictionary<string, string>
 			{
 				["groupName"] = member.CurrentGroup.Name,
-				["muted"]     = mutedColor,
-				["enabled"]   = chatColor
+				["muted"] = mutedColor,
+				["enabled"] = chatColor
 			};
-			
-			var line = ParseTemplate(VoiceEntry.Instance.Translation.HintGroup, groupValues);
+
+			var line = TranslationParser.ParseTemplate(VoiceEntry.Instance.Translation.HintGroup, groupValues);
 			sb.AppendLine(line);
 		}
 
@@ -254,25 +254,24 @@ public class ChatMember
 			var proxColor = member.ProximityChat
 				? "<color=green>Enabled</color>"
 				: "<color=red>Disabled</color>";
-			
+
 			var proxValues = new Dictionary<string, string>
 			{
 				["proximity"] = proxColor
 			};
 
-			var line = ParseTemplate(VoiceEntry.Instance.Translation.HintProximity, proxValues);
+			var line = TranslationParser.ParseTemplate(VoiceEntry.Instance.Translation.HintProximity, proxValues);
 			sb.AppendLine(line);
 		}
+
 		return StringBuilderPool.Shared.ToStringReturn(sb);
 	}
-	
-	public static string ParseTemplate(string template, Dictionary<string, string> values)
+
+	public static string GetHintGroupMembersText(ReferenceHub hub)
 	{
-		return Regex.Replace(template, @"\{(\w+)\}", m =>
-		{
-			var key = m.Groups[1].Value;
-			return values.TryGetValue(key, out var val) ? val : m.Value;
-		});
+		if (!ChatMember.TryGet(hub, out var member))
+			return "";
+		return member.CurrentGroup?.GetAllMembersText();
 	}
 
 	public override string ToString()
