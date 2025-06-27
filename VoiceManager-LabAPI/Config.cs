@@ -31,7 +31,7 @@ public class Config
 		RoleTypeId.Scp939,
 		RoleTypeId.Scp3114,
 	];
-	[Description("Will the plugin immediately create hints by default?")]
+	[Description("Will the plugin automatically create hints by default?")]
 	public bool AutoDefaultHints { get; set; } = true;
 	[Description("Coordinates where the hint will be")]
 	public Vector2 HintPosition { get; set; } = new Vector2(55, 1070);
