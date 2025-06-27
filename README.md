@@ -18,7 +18,7 @@ Allows you to create group chats or give Proximity Chat to Scp.
 - **Proximity chat**
   - Available only to SCP
   - Removed upon death or when the player is no longer an SCP
-  - There are two options: 3D, which uses SpeakerToy with reverb, and 2D without it, but there will be a player bar on the right.
+  - There are two options: 3D, which uses SpeakerToy with reverb, and 2D without it, but there will be a player bar on the right (You can configure it in the config or via the in-game command).
 
 The plugin has a **settings** command that allows you to change some variables in real time without restarting the server, but all changes are reset to the values ​​from the config after restarting the server.
 
