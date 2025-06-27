@@ -1,4 +1,4 @@
-# VoiceManager ![Downloads](https://img.shields.io/github/downloads/Smer4k/VoiceManager/total)
+# VoiceManager <img src="https://img.shields.io/github/downloads/Smer4k/VoiceManager/total?style=for-the-badge&logo=github" alt="Downloads">
 
 Allows you to create group chats or give Proximity Chat to Scp.
 
