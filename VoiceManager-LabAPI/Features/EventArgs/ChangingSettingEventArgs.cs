@@ -9,5 +9,5 @@ public class ChangingSettingEventArgs
 	}
 	public string SettingName { get; }
 	public object Value { get; }
-	public bool IsAllowed  { get; set; } = false;
+	public bool IsAllowed  { get; set; } = true;
 }
