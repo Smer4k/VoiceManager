@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using PlayerRoles;
 using UserSettings.ServerSpecific;
 using UserSettings.ServerSpecific.Examples;
@@ -19,21 +20,25 @@ public class SSChatController
 	public void Activate()
 	{
 		var translation = VoiceEntry.Instance.Translation;
-		ServerSpecificSettingsSync.DefinedSettings =
-		[
-			new SSGroupHeader(translation.ServerSpecificSettingHeading),
-			new SSKeybindSetting((int?)BindId.ProximityChat, translation.ServerSpecificProximity,
-				hint: translation.ServerSpecificProximityHint),
-			new SSKeybindSetting((int?)BindId.GroupChat, translation.ServerSpecificGroup,
-				hint: translation.ServerSpecificGroupHint),
-			new SSKeybindSetting((int?)BindId.NextGroupChat, translation.ServerSpecificNextGroup,
-				hint: translation.ServerSpecificNextGroupHint),
-			new SSKeybindSetting((int?)BindId.MuteUnmute, translation.ServerSpecificMuteUnmute,
-				hint: translation.ServerSpecificMuteUnmuteHint),
-			new SSTwoButtonsSetting((int?)BindId.ActivationMode, translation.ServerSpecificActivationMode,
-				translation.ServerSpecificActivationModeA,
-				translation.ServerSpecificActivationModeB, hint: translation.ServerSpecificActivationModeHint)
-		];
+		
+		List<ServerSpecificSettingBase> settings = new(6);
+		if (ServerSpecificSettingsSync.DefinedSettings != null)
+			settings.AddRange(ServerSpecificSettingsSync.DefinedSettings);
+		
+		settings.Add(new SSGroupHeader(translation.ServerSpecificSettingHeading));
+		settings.Add(new SSKeybindSetting((int?)BindId.ProximityChat, translation.ServerSpecificProximity,
+			hint: translation.ServerSpecificProximityHint));
+		settings.Add(new SSKeybindSetting((int?)BindId.GroupChat, translation.ServerSpecificGroup,
+			hint: translation.ServerSpecificGroupHint));
+		settings.Add(new SSKeybindSetting((int?)BindId.NextGroupChat, translation.ServerSpecificNextGroup,
+			hint: translation.ServerSpecificNextGroupHint));
+		settings.Add(new SSKeybindSetting((int?)BindId.MuteUnmute, translation.ServerSpecificMuteUnmute,
+			hint: translation.ServerSpecificMuteUnmuteHint));
+		settings.Add(new SSTwoButtonsSetting((int?)BindId.ActivationMode, translation.ServerSpecificActivationMode,
+			translation.ServerSpecificActivationModeA,
+			translation.ServerSpecificActivationModeB, hint: translation.ServerSpecificActivationModeHint));
+		
+		ServerSpecificSettingsSync.DefinedSettings = settings.ToArray();
 		ServerSpecificSettingsSync.SendToAll();
 		ServerSpecificSettingsSync.ServerOnSettingValueReceived += ProcessUserInput;
 	}

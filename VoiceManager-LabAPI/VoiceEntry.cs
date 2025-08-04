@@ -16,7 +16,7 @@ public class VoiceEntry : Plugin
 	public override string Name { get; } = "VoiceManager";
 	public override string Description { get; } = "Allows you to create group chats or give Proximity Chat to Scp.";
 	public override string Author { get; } = "Smer4k";
-	public override Version Version { get; } = new Version(1, 0, 0);
+	public override Version Version { get; } = new Version(1, 0, 2);
 	public override Version RequiredApiVersion { get; } = LabApiProperties.CurrentVersion;
 	public override LoadPriority Priority => LoadPriority.High;
 	public static VoiceEntry Instance;

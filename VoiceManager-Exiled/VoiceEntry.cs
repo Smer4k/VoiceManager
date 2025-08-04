@@ -11,7 +11,7 @@ public class VoiceEntry : Plugin<Config, Translation>
 {
 	public override string Name { get; } = "VoiceManager";
 	public override string Author { get; } = "Smer4k";
-	public override Version Version { get; } = new Version(1, 0, 0);
+	public override Version Version { get; } = new Version(1, 0, 2);
 	public override string Prefix => "VoiceManager";
 	public override PluginPriority Priority => PluginPriority.High;
 	public static VoiceEntry Instance;
