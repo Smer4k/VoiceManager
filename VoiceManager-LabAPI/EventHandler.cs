@@ -1,6 +1,7 @@
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features.Extensions;
+using LabApi.Features.Wrappers;
 using VoiceChat;
 using VoiceChat.Networking;
 using VoiceManager.Features;
@@ -73,13 +74,13 @@ public class EventHandler : CustomEventsHandler
 		ev.IsAllowed = false;
 	}
 
-	public override void OnPlayerChangingRole(PlayerChangingRoleEventArgs ev)
+	public override void OnPlayerChangedRole(PlayerChangedRoleEventArgs ev)
 	{
 		ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member);
 
 		if (member != null)
 		{
-			if (!ev.NewRole.IsScp())
+			if (!ev.NewRole.RoleTypeId.IsScp())
 				member.SetHasProximityChat(false);
 
 			member.SetProximityChat(false);
@@ -87,7 +88,7 @@ public class EventHandler : CustomEventsHandler
 		}
 
 		if (VoiceEntry.Instance.Config.AutoInitProximityChatRoles &&
-		    VoiceEntry.Instance.Config.ProximityChatRoles.Contains(ev.NewRole))
+		    VoiceEntry.Instance.Config.ProximityChatRoles.Contains(ev.NewRole.RoleTypeId))
 		{
 			member ??= ChatMember.Get(ev.Player);
 			member.SetHasProximityChat(true);

@@ -1,6 +1,7 @@
-using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.Events.EventArgs.Player;
+using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Features.Extensions;
 using VoiceChat;
 using VoiceManager.Features;
 
@@ -59,13 +60,13 @@ public class EventHandler
 		ev.IsAllowed = false;
 	}
 
-	public void OnPlayerChangingRole(ChangingRoleEventArgs ev)
+	public void OnPlayerChangedRole(PlayerChangedRoleEventArgs ev)
 	{
 		ChatMember.TryGet(ev.Player.ReferenceHub, out ChatMember member);
 
 		if (member != null)
 		{
-			if (!ev.NewRole.IsScp())
+			if (!ev.NewRole.RoleTypeId.IsScp())
 				member.SetHasProximityChat(false);
 			
 			member.SetProximityChat(false);
@@ -73,7 +74,7 @@ public class EventHandler
 		}
 
 		if (VoiceEntry.Instance.Config.AutoInitProximityChatRoles &&
-		    VoiceEntry.Instance.Config.ProximityChatRoles.Contains(ev.NewRole))
+		    VoiceEntry.Instance.Config.ProximityChatRoles.Contains(ev.NewRole.RoleTypeId))
 		{
 			member ??= ChatMember.Get(ev.Player);
 			member.SetHasProximityChat(true);
@@ -81,7 +82,8 @@ public class EventHandler
 
 		if (VoiceEntry.Instance.Config.SendBroadcastOnRoleChange)
 		{
-			ev.Player.Broadcast(VoiceEntry.Instance.Config.BroadcastDuration, VoiceEntry.Instance.Translation.BroadcastMessage);
+			ev.Player.SendBroadcast(VoiceEntry.Instance.Translation.BroadcastMessage,
+				VoiceEntry.Instance.Config.BroadcastDuration);
 		}
 	}
 }
